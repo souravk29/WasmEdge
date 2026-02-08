@@ -4,6 +4,8 @@
 set(SOURCES
   compilerTool.cpp
   runtimeTool.cpp
+  parseTool.cpp
+  validateTool.cpp
   fuzzTool.cpp
   fuzzPO.cpp
   uniTool.cpp
@@ -13,8 +15,16 @@ if(WASMEDGE_BUILD_WASI_NN_RPC)
   list(APPEND SOURCES wasiNNRPCServerTool.cpp)
 endif()
 
+
 wasmedge_add_library(wasmedgeDriver
   ${SOURCES}
+)
+
+# Ensure the C API headers are found
+target_include_directories(wasmedgeDriver
+  PRIVATE
+    ${CMAKE_SOURCE_DIR}/include/api
+    ${CMAKE_BINARY_DIR}/include/api
 )
 
 if(WASMEDGE_BUILD_WASI_NN_RPC)

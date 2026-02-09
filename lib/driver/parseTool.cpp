@@ -60,4 +60,4 @@ int Parse(struct DriverParseOptions
 }
 
 } // namespace Driver
-} // namespace WasmEdge
+} // namespace WasmEdge 

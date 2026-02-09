@@ -97,4 +97,4 @@ int UniTool(int Argc, const char *Argv[], const ToolType ToolSelect) noexcept {
   }
 }
 } // namespace Driver
-} // namespace WasmEdge
+} // namespace WasmEdge 

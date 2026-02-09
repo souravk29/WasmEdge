@@ -7,15 +7,15 @@
 #include <string>
 #include <vector>
 
-// STRICT C API USE
 #include "wasmedge/wasmedge.h"
 
 namespace WasmEdge {
 namespace Driver {
 
-int Parse(struct DriverParseOptions &Opts) noexcept {
+int Parse(struct DriverParseOptions
+              &Opts) noexcept { // will change this to be "const", since no
+                                // mutation needed
   // 1. Check if file exists
-  // FIX: Use 'WasmName' instead of 'InputPath'
   if (!std::filesystem::exists(Opts.WasmName.value())) {
     std::cerr << "Error: Input file not found: " << Opts.WasmName.value()
               << std::endl;
@@ -28,7 +28,6 @@ int Parse(struct DriverParseOptions &Opts) noexcept {
   WasmEdge_ASTModuleContext *Module = nullptr;
 
   // 3. Load and Parse using C API
-  // FIX: Use 'WasmName' to get the string
   std::string PathStr = Opts.WasmName.value();
   WasmEdge_Result Res =
       WasmEdge_LoaderParseFromFile(Loader, &Module, PathStr.c_str());

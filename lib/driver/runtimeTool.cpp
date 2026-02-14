@@ -487,16 +487,24 @@ int Tool(struct DriverToolOptions &Opt) noexcept {
       const AST::FunctionType *FuncType = nullptr;
       for (const auto &Func : VM.getFunctionList()) {
         if (Func.first == InitFunc) {
-          // Found the init function.
           HasInit = true;
-        } else if (Func.first == FuncName) {
-          // Found the function to invoke.
+        }
+        if (Func.first == FuncName) {
           FuncType = &Func.second;
         }
       }
 
-      // If found initialize function, invoke it first.
-      if (HasInit) {
+      // Block direct double-call of _initialize
+      if (FuncName == InitFunc && VM.isInitialized()) {
+        fmt::print(stderr, "[WasmEdge] Direct call to _initialize is not "
+                           "allowed because it was already called in reactor "
+                           "mode. Skipping as a safety measure.\n");
+        return EXIT_SUCCESS;
+      }
+
+      // Auto-invoke _initialize for reactor mode if present and not yet run
+      if (HasInit && !VM.isInitialized()) {
+        VM.markInitialized();
         auto AsyncResult = VM.asyncExecute(InitFunc);
         if (Timeout.has_value()) {
           if (!AsyncResult.waitUntil(*Timeout)) {
@@ -507,7 +515,13 @@ int Tool(struct DriverToolOptions &Opt) noexcept {
           // It indicates that the execution of wasm has been aborted.
           return 128 + SIGABRT;
         }
+        // If the requested function *is* _initialize, we're done
+        if (FuncName == InitFunc) {
+          return EXIT_SUCCESS;
+        }
       }
+
+      // Normal case: run the function requested
       return ToolOnModule(VM, FuncName, Timeout, Opt, *FuncType);
     } else if (VM.holdsComponent()) {
       // Component case.
@@ -516,7 +530,6 @@ int Tool(struct DriverToolOptions &Opt) noexcept {
       const AST::Component::FuncType *FuncType = nullptr;
       for (const auto &Func : VM.getComponentFunctionList()) {
         if (Func.first == FuncName) {
-          // Found the function to invoke.
           FuncType = &Func.second;
         }
       }
@@ -529,7 +542,3 @@ int Tool(struct DriverToolOptions &Opt) noexcept {
       return 128 + SIGABRT;
     }
   }
-}
-
-} // namespace Driver
-} // namespace WasmEdge

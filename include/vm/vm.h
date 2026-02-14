@@ -40,11 +40,19 @@ namespace VM {
 
 /// VM execution flow class
 class VM {
+private:
+  // Tracks if _initialize has been executed
+  bool initialized_ = false;
+
 public:
   VM() = delete;
   VM(const Configure &Conf);
   VM(const Configure &Conf, Runtime::StoreManager &S);
   ~VM() = default;
+
+  void markInitialized() noexcept { initialized_ = true; }
+  void resetInitialized() noexcept { initialized_ = false; }
+  bool isInitialized() const noexcept { return initialized_; }
 
   /// ======= Functions can be called before instantiated stage. =======
   /// Register wasm modules and host modules.

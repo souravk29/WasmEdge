@@ -362,6 +362,7 @@ Expect<void> VM::unsafeLoadWasm(const std::filesystem::path &Path) {
                              [&](auto &C) -> void { Comp = std::move(C); }),
              ComponentOrModule);
   Stage = VMStage::Loaded;
+  resetInitialized();
   return {};
 }
 
@@ -373,12 +374,14 @@ Expect<void> VM::unsafeLoadWasm(Span<const Byte> Code) {
                              [&](auto &C) -> void { Comp = std::move(C); }),
              ComponentOrModule);
   Stage = VMStage::Loaded;
+  resetInitialized();
   return {};
 }
 
 Expect<void> VM::unsafeLoadWasm(const AST::Module &Module) {
   Mod = std::make_unique<AST::Module>(Module);
   Stage = VMStage::Loaded;
+  resetInitialized();
   return {};
 }
 
